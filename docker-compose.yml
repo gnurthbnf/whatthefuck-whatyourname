@@ -1,21 +1,20 @@
 version: '3.8'
 
 services:
-  app:
+  # Dịch vụ Go chính (Go-AI-Stream)
+  go-server:
     build: .
     ports:
       - "8080:8080"
     environment:
-      - PORT=8080
-      - AI_API_URL=https://api.groq.com/openai/v1/chat/completions
-      - AI_API_KEY=${AI_API_KEY}
-      - REDIS_URL=redis://redis:6379
+      - AI_SERVICE_URL=http://ai-worker:8000
     depends_on:
-      - redis
+      - ai-worker
     restart: always
 
-  redis:
-    image: redis:alpine
+  # Dịch vụ Python AI Worker phụ trách xử lý AI streaming
+  ai-worker:
+    build: ./ai-service
     ports:
-      - "6379:6379"
+      - "8000:8000"
     restart: always
