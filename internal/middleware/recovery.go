@@ -5,12 +5,13 @@ import (
 	"net/http"
 )
 
-func RecoveryMiddleware(next http.Handler) http.Handler {
+// Recovery bắt các sự cố panic giúp server luôn hoạt động ổn định
+func Recovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("CRITICAL PANIC RECOVERED: %v", err)
-				http.Error(w, "Lỗi hệ thống nội bộ, vui lòng thử lại sau!", http.StatusInternalServerError)
+				log.Printf("Xảy ra Panic: %v", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
 		}()
 		next.ServeHTTP(w, r)
