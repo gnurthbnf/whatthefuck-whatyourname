@@ -46,7 +46,7 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
             
             if (!prompt.trim()) return;
             outputDiv.innerText = "";
-            statusDiv.innerText = `Trạng thái: Đang kết nối streaming...`;
+            statusDiv.innerText = "Trạng thái: Đang kết nối streaming...";
 
             try {
                 const response = await fetch('/api/stream', {
@@ -68,7 +68,7 @@ func HandleHome(w http.ResponseWriter, r *http.Request) {
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) {
-                        statusDiv.innerText = `Trạng thái: Hoàn tất (${count} chunks)`;
+                        statusDiv.innerText = "Trạng thái: Hoàn tất (" + count + " chunks)";
                         break;
                     }
                     outputDiv.innerText += decoder.decode(value, { stream: true });
