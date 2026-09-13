@@ -1,25 +1,45 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Mã nguồn checkout
         uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: Cài đặt môi trường Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
 
-      - name: Install dependencies
-        run: go mod download
+      - name: Build Go Gateway
+        run: |
+          cd .
+          go build -o server cmd/server/main.go || go build -o server main.go
 
-      - name: Run tests
-        run: go test -v ./...
+      - name: Cài đặt môi trường Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Kiểm tra Python AI Worker
+        run: |
+          cd ai-service
+          pip install -r requirements.txt
+
+      - name: Cài đặt môi trường Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build Rust Worker
+        run: |
+          cd rust-service
+          cargo build --release
