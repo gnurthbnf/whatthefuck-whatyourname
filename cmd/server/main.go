@@ -4,27 +4,41 @@ import (
 	"log"
 	"net/http"
 
+	"go-ai-stream/internal/client"
 	"go-ai-stream/internal/middleware"
 	"go-ai-stream/internal/storage"
 )
 
 func main() {
-	// Khởi tạo bộ lưu trữ RAM nội bộ
+	// Khởi tạo storage và client
 	store := storage.NewMemoryStore()
+	serviceClient := client.NewServiceClient()
 
-	// Đăng ký các route xử lý HTTP
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+	// Khai báo các route API
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "running", "message": "Go AI Stream Server is up!"}`))
+		w.Write([]byte("OK"))
 	})
 
-	// Áp dụng middleware chống spam (Rate limiter)
-	handler := middleware.RateLimiter(mux)
+	mux.HandleFunc("/api/ai", func(w http.ResponseWriter, r *http.Request) {
+		// Sử dụng store để lưu hoặc lấy dữ liệu session
+		_ = store.AddMessage(r.Context(), "default", storage.Message{Role: "user", Content: "ping"})
 
-	log.Println("Server đang khởi động tại cổng :8080...")
+		if err := serviceClient.CallAIWorker(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte("AI Worker connection successful"))
+	})
+
+	// Bọc mux bằng middleware RateLimiter và Recovery
+	var handler http.Handler = mux
+	handler = middleware.RateLimiter(handler)
+	handler = middleware.Recovery(handler)
+
+	log.Println("Server đang chạy tại cổng :8080...")
 	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatalf("Lỗi khởi động server: %v", err)
 	}
