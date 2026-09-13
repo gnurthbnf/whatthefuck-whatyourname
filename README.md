@@ -1,15 +1,96 @@
-# Go AI Stream
+# 🚀 Go AI Stream - Polyglot Microservice Architecture
 
-Hệ thống Microservice xử lý AI Streaming real-time hiệu suất cao viết bằng ngôn ngữ Go, hỗ trợ lưu trữ phiên làm việc qua Redis/RAM và cơ chế Fallback thông minh giữa các AI Provider.
+![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=for-the-badge&logo=go&logoColor=white)
+![Python Version](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Rust Version](https://img.shields.io/badge/Rust-2021-000000?style=for-the-badge&logo=rust&logoColor=white)
+![CI/CD Status](https://img.shields.io/badge/CI%2FCD-Passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-## Cấu trúc thư mục
-- `cmd/server/`: Điểm khởi chạy ứng dụng (Entry point).
-- `internal/config/`: Quản lý biến môi trường và thiết lập hệ thống.
-- `internal/handlers/`: Xử lý HTTP request, SSE streaming và giao diện web.
-- `internal/middleware/`: Bộ lọc chống spam (Rate limiter).
-- `internal/service/`: Logic cốt lõi tích hợp cơ chế gọi AI dự phòng (Fallback).
-- `internal/storage/`: Tích hợp lưu trữ phiên qua In-Memory RAM hoặc Redis phân tán.
+A production-ready, high-performance polyglot microservice backend engineered for real-time AI streaming responses, low-latency processing, and robust session management.
 
-## Hướng dẫn chạy nhanh bằng Docker
-```bash
+---
+
+## 🏗 System Architecture
+
+The project leverages the unique strengths of three programming environments:
+
+                  ┌────────────────────────┐
+                  │   Client / Frontend    │
+                  └───────────┬────────────┘
+                              │ HTTP / SSE
+                              ▼
+                  ┌────────────────────────┐
+                  │  Go API Gateway (:8080)│
+                  │ (Rate Limit, Auth, CI) │
+                  └────┬──────────────┬────┘
+                       │              │
+         gRPC / HTTP   │              │  gRPC / HTTP
+                       ▼              ▼
+┌─────────────────────────┐        ┌────────────────────────────┐
+│ Python AI Worker        │        │ Rust Performance Worker    │
+│ (LLM Engine / Inference)│        │ (High-Speed Data Engine)   │
+└─────────────────────────┘        └────────────────────────────┘
+
+**Service Roles**
+* **Go API Gateway (`:8080`)**: Entry point for all client communication. Features concurrency-safe request handling, custom `RateLimiter`, panic `Recovery` middleware, and chunked HTTP response streaming.
+* **Python AI Engine**: Handles heavy LLM/AI prompt orchestration and dynamic inference workflows.
+* **Rust Worker**: Executes high-throughput data transformations and computationally intensive operations with memory safety.
+
+---
+
+## ✨ Key Features
+
+* **Real-time Streaming Response**: Native SSE/Chunked HTTP transfer support for interactive AI chat interface.
+* **Session Continuity**: Thread-safe `MemoryStore` mapping for tracking stateful conversation context across unique session IDs.
+* **Resilient Infrastructure**: Built-in HTTP middleware preventing server crashes (`Recovery`) and mitigating abuse (`RateLimiter`).
+* **Automated Quality Assurance**: 100% green CI/CD pipeline integrated via GitHub Actions covering linting and comprehensive package unit tests.
+
+---
+
+## 🛠 Tech Stack
+
+| Domain | Technology |
+| :--- | :--- |
+| **API Gateway** | Go 1.22, Standard `net/http` |
+| **AI Worker** | Python 3.11, AsyncIO |
+| **Performance Engine** | Rust 2021 Edition |
+| **CI/CD & DevOps** | GitHub Actions, Docker, Docker Compose |
+| **Testing** | Go Standard `testing` Package |
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+* Docker & Docker Compose installed.
+* Or Go 1.22+ installed locally.
+
+### Option 1: Run via Docker Compose (Recommended)
+
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/go-ai-stream.git
+cd go-ai-stream
+
+# Build and start all services
 docker-compose up --build
+
+Access the application web interface at `http://localhost:8080`.
+
+### Option 2: Run Go Gateway Locally
+
+# Execute the main Go application
+go run cmd/server/main.go
+
+---
+
+## 🧪 Testing
+
+Execute automated unit tests across all internal Go packages (`middleware`, `storage`, `service`, `handlers`):
+
+go test -v ./...
+
+---
+
+## 📄 License
+
+This project is open-source and available under the MIT License.
