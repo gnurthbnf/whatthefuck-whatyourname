@@ -7,19 +7,17 @@ services:
       - "8080:8080"
     environment:
       - AI_SERVICE_URL=http://ai-worker:8000
-      - LOG_LEVEL=debug
+      - RUST_SERVICE_URL=http://rust-worker:8001
     depends_on:
-      ai-worker:
-        condition: service_healthy
-    restart: always
+      - ai-worker
+      - rust-worker
 
   ai-worker:
     build: ./ai-service
     ports:
       - "8000:8000"
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; r = httpx.get('http://localhost:8000/health'); exit(0 if r.status_code == 200 else 1)"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    restart: always
+
+  rust-worker:
+    build: ./rust-service
+    ports:
+      - "8001:8001"
