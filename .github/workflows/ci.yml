@@ -10,7 +10,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Mã nguồn checkout
+      - name: Checkout mã nguồn
         uses: actions/checkout@v4
 
       - name: Cài đặt môi trường Go
@@ -18,28 +18,29 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Tải các module Go phụ thuộc
+        run: go mod tidy
+
       - name: Build Go Gateway
-        run: |
-          cd .
-          go build -o server cmd/server/main.go || go build -o server main.go
+        run: go build -o server cmd/server/main.go
 
       - name: Cài đặt môi trường Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Kiểm tra Python AI Worker
+      - name: Cài đặt thư viện Python AI Worker
         run: |
           cd ai-service
           pip install -r requirements.txt
 
-      - name: Cài đặt môi trường Rust
+      - name: Cài đặt Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
 
-      - name: Build Rust Worker
+      - name: Build Rust Performance Worker
         run: |
           cd rust-service
           cargo build --release
