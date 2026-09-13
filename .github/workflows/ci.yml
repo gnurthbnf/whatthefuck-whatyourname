@@ -21,6 +21,9 @@ jobs:
       - name: Tải các module Go phụ thuộc
         run: go mod tidy
 
+      - name: Chạy Unit Tests Go Gateway
+        run: go test -v ./...
+
       - name: Build Go Gateway
         run: go build -o server cmd/server/main.go
 
